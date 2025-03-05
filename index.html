@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="무료 로또 번호 생성기 | 랜덤으로 로또 번호를 추천해드립니다.">
+    <title>로또 번호 생성기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .lotto-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+        .number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            font-weight: bold;
+            margin: 5px;
+            color: white;
+            text-align: center;
+            font-size: 16px;
+        }
+        .yellow { background-color: #fbc02d; }
+        .blue { background-color: #1976d2; }
+        .red { background-color: #d32f2f; }
+        .gray { background-color: #616161; }
+        .green { background-color: #388e3c; }
+    </style>
+</head>
+<body>
+    <h1>🎰 로또 번호 생성기</h1>
+    <label for="algorithm">번호 생성 알고리즘 선택:</label>
+    <select id="algorithm">
+        <option value="random">완전 랜덤</option>
+        <option value="hotcold">가중치 기반 (Hot & Cold Numbers)</option>
+        <option value="frequent">자주 나온 숫자 기반 (실시간 반영)</option>
+    </select>
+    <div class="lotto-container">
+        <div id="lotto-results"></div>
+        <button class="btn" id="generate-btn">번호 생성</button>
+        <button class="btn" id="save-btn">선택한 번호 저장</button>
+        <button class="btn" id="download-btn">저장된 번호 이미지 다운로드</button>
+    </div>
+    <div class="saved-numbers">
+        <h3>저장된 번호</h3>
+        <div id="saved-results"></div>
+    </div>
+
+    <script>
+        document.getElementById("generate-btn").addEventListener("click", generateLottoNumbers);
+        document.getElementById("save-btn").addEventListener("click", saveSelectedNumbers);
+        document.getElementById("download-btn").addEventListener("click", downloadImage);
+
+        function generateLottoNumbers() {
+            let resultsContainer = document.getElementById("lotto-results");
+            resultsContainer.innerHTML = "";
+            for (let i = 0; i < 5; i++) {
+                let numbers = [];
+                while (numbers.length < 6) {
+                    let num = Math.floor(Math.random() * 45) + 1;
+                    if (!numbers.includes(num)) {
+                        numbers.push(num);
+                    }
+                }
+                numbers.sort((a, b) => a - b);
+                let numberElements = numbers.map(num => `<span class='number ${getColor(num)}'>${num}</span>`).join(" ");
+                resultsContainer.innerHTML += `<p><input type='checkbox' class='save-checkbox'> ${numberElements}</p>`;
+            }
+        }
+
+        function saveSelectedNumbers() {
+            const savedResultsContainer = document.getElementById("saved-results");
+            let selectedSets = document.querySelectorAll(".save-checkbox:checked");
+            if (selectedSets.length === 0) {
+                alert("저장할 번호를 선택하세요.");
+                return;
+            }
+            selectedSets.forEach(checkbox => {
+                let numbers = checkbox.parentElement.innerHTML.replace(/<input.*?>/, "");
+                checkbox.parentElement.remove();
+                savedResultsContainer.innerHTML += `<p>${numbers}</p>`;
+            });
+        }
+
+        function downloadImage() {
+            html2canvas(document.querySelector(".saved-numbers")).then(canvas => {
+                let link = document.createElement("a");
+                link.download = "saved-lotto-numbers.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+
+        function getColor(num) {
+            if (num <= 10) return 'yellow';
+            else if (num <= 20) return 'blue';
+            else if (num <= 30) return 'red';
+            else if (num <= 40) return 'gray';
+            else return 'green';
+        }
+    </script>
+</body>
+</html>
